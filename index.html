@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    
+    <!-- iOS Web App Meta Tags -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="My List">
+    
+    <title>My Mobile List</title>
+    
+    <style>
+        :root {
+            --primary: #007AFF;
+            --bg: #F2F2F7;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .container {
+            width: 100%;
+            max-width: 400px;
+            background: white;
+            border-radius: 12px;
+            padding: 15px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        h2 { text-align: center; color: #1c1c1e; }
+        ul { list-style: none; padding: 0; }
+        li {
+            padding: 12px;
+            border-bottom: 1px solid #e5e5ea;
+            display: flex;
+            justify-content: space-between;
+        }
+        li:last-child { border-bottom: none; }
+        input {
+            width: calc(100% - 24px);
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            font-size: 16px; /* Prevents iOS zoom on focus */
+        }
+        button {
+            width: 100%;
+            padding: 12px;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2>My List</h2>
+        <input type="text" id="itemInput" placeholder="Add new item...">
+        <button onclick="addItem()">Add to List</button>
+        <ul id="itemList"></ul>
+    </div>
+
+    <script>
+        function addItem() {
+            const input = document.getElementById('itemInput');
+            const val = input.value;
+            if (val === '') return;
+
+            const li = document.createElement('li');
+            li.textContent = val;
+            
+            // Delete tap gesture
+            li.onclick = function() { this.remove(); saveItems(); };
+            
+            document.getElementById('itemList').appendChild(li);
+            input.value = '';
+            saveItems();
+        }
+
+        function saveItems() {
+            const items = [];
+            document.querySelectorAll('li').forEach(li => items.push(li.textContent));
+            localStorage.setItem('myListData', JSON.stringify(items));
+        }
+
+        function loadItems() {
+            const saved = JSON.parse(localStorage.getItem('myListData') || '[]');
+            const list = document.getElementById('itemList');
+            saved.forEach(text => {
+                const li = document.createElement('li');
+                li.textContent = text;
+                li.onclick = function() { this.remove(); saveItems(); };
+                list.appendChild(li);
+            });
+        }
+
+        window.onload = loadItems;
+    </script>
+</body>
+</html>
