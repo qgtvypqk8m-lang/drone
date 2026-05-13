@@ -12,64 +12,63 @@
         .card { background: white; width: 100%; max-width: 400px; border-radius: 15px; padding: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
         h2 { text-align: center; margin-top: 0; }
         input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 10px; margin-bottom: 10px; box-sizing: border-box; font-size: 16px; }
-        button { width: 100%; padding: 12px; background: var(--blue); color: white; border: none; border-radius: 10px; font-weight: 600; font-size: 16px; margin-bottom: 10px; }
+        button { width: 100%; padding: 12px; background: var(--blue); color: white; border: none; border-radius: 10px; font-weight: 600; font-size: 16px; margin-bottom: 10px; cursor: pointer; }
         button.secondary { background: #ff3b30; margin-top: 20px; font-size: 14px; opacity: 0.8; }
         ul { list-style: none; padding: 0; margin-top: 20px; }
-        li { background: #fff; padding: 15px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; animation: slideIn 0.2s ease; }
+        li { background: #fff; padding: 15px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; }
         li:last-child { border-bottom: none; }
-        @keyframes slideIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body>
     <div class="card">
-        <h2>My List</h2>
-        <input type="text" id="itemInput" placeholder="Add new item..." autocomplete="off">
-        <button onclick="addItem()">Add to List</button>
+        <h2>Drone Checklist</h2>
+        <input type="text" id="itemInput" placeholder="Add task..." autocomplete="off">
+        <button id="addBtn">Add to List</button>
         <ul id="itemList"></ul>
-        <button class="secondary" onclick="clearAll()">Clear All Items</button>
+        <button class="secondary" id="clearBtn">Clear All Items</button>
     </div>
 
     <script>
         const input = document.getElementById('itemInput');
         const list = document.getElementById('itemList');
-
-        function addItem() {
-            const text = input.value.trim();
-            if (text === "") return;
-            createTaskElement(text);
-            input.value = "";
-            saveData();
-        }
-
-        function createTaskElement(text) {
-            const li = document.createElement('li');
-            li.innerHTML = `<span>${text}</span> <span style="color:#ccc; font-size:12px;">Tap to delete</span>`;
-            li.onclick = function() { this.remove(); saveData(); };
-            list.appendChild(li);
-        }
+        const addBtn = document.getElementById('addBtn');
+        const clearBtn = document.getElementById('clearBtn');
 
         function saveData() {
             const items = [];
-            document.querySelectorAll('li span:first-child').forEach(el => items.push(el.innerText));
-            localStorage.setItem('droneData', JSON.stringify(items));
+            document.querySelectorAll('li span.text').forEach(el => items.push(el.innerText));
+            localStorage.setItem('drone_tasks', JSON.stringify(items));
         }
 
-        function loadData() {
-            const saved = JSON.parse(localStorage.getItem('droneData') || '[]');
-            saved.forEach(text => createTaskElement(text));
+        function createTask(text) {
+            const li = document.createElement('li');
+            li.innerHTML = `<span class="text">${text}</span> <span style="color:#ff3b30; font-size:12px;">Delete</span>`;
+            li.onclick = () => { li.remove(); saveData(); };
+            list.appendChild(li);
         }
 
-        function clearAll() {
-            if(confirm("Clear the whole list?")) {
-                list.innerHTML = "";
-                localStorage.removeItem('droneData');
+        addBtn.onclick = () => {
+            const val = input.value.trim();
+            if (val) {
+                createTask(val);
+                input.value = "";
+                saveData();
             }
-        }
+        };
 
-        // Allow "Enter" key on keyboard to add item
-        input.addEventListener("keypress", (e) => { if (e.key === "Enter") addItem(); });
+        clearBtn.onclick = () => {
+            if (confirm("Delete all?")) {
+                list.innerHTML = "";
+                localStorage.removeItem('drone_tasks');
+            }
+        };
 
-        window.onload = loadData;
+        input.onkeypress = (e) => { if (e.key === "Enter") addBtn.click(); };
+
+        window.onload = () => {
+            const saved = JSON.parse(localStorage.getItem('drone_tasks') || '[]');
+            saved.forEach(t => createTask(t));
+        };
     </script>
 </body>
 </html>
